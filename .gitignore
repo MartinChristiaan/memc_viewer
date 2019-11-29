@@ -1,5 +1,5 @@
 public/bundle.js*
-
+public/sequences
 # Node
 node_modules/
 
