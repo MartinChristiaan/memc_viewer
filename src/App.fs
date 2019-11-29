@@ -10,6 +10,7 @@ open Elmish.React
 open Fable.React
 open Fable.React.Props
 open Browser.Dom
+open Data
 
 // MODEL
 
@@ -17,14 +18,16 @@ let estimations = ["cBi0_compensated";
                   "cBw0_compensated";
                   "cFw0_compensated";
                   "Retz_compensated";]
+
 let maxFrames = 38
 type Model = {
-  currentTitle : string
+  currentSequence : int
   currentFrame : int
   currentEstimation : int
   isPlaying : bool
   slowdown : int
   ticksInFrame : int
+  imsize : int
 }
 
 type Msg =
@@ -36,14 +39,21 @@ type Msg =
 | IncreaseSlowdown
 | DecreaseSlowdown
 | TogglePaying
+| NextSequence
+| PreviousSequence
+| IncreaseSize
+| DecreaseSize
 
 
-let init() : Model = {currentTitle = "miami"
+let imsizes = ["320px";"480px";"640px";"720px";"1080px"]
+
+let init() : Model = {currentSequence = 0
                       currentFrame=0;
                       currentEstimation=3;
                       isPlaying=false
                       ticksInFrame=0;
-                      slowdown = 1}
+                      slowdown = 1;
+                      imsize = 0}
 
 let increaseBoundedInt value bound = 
   if value = bound then
@@ -71,6 +81,10 @@ let keyboardInput dispatch =
       else if kbevent.key = "p" then dispatch TogglePaying
       else if kbevent.key = "z" then dispatch DecreaseSlowdown
       else if kbevent.key = "x" then dispatch IncreaseSlowdown
+      else if kbevent.key = "q" then dispatch NextSequence
+      else if kbevent.key = "e" then dispatch PreviousSequence
+      else if kbevent.key = "n" then dispatch IncreaseSize
+      else if kbevent.key = "m" then dispatch DecreaseSize
       ))
 
     
@@ -97,6 +111,8 @@ let update (msg:Msg) (model:Model) =
     | TogglePaying -> {model with isPlaying = not model.isPlaying}
     | IncreaseSlowdown -> {model with slowdown = model.slowdown+1}
     | DecreaseSlowdown -> {model with slowdown = model.slowdown-1}
+    | IncreaseSize -> {model with imsize = (increaseBoundedInt model.imsize (imsizes.Length-1))}
+    | DecreaseSize -> {model with imsize = (decreaseBoundedInt model.imsize (imsizes.Length-1)) }
 
 // VIEW (rendered with React)
 
@@ -111,9 +127,9 @@ let getImgSource (model:Model) framenumber=
         "reference_frames/" + filename
       else
         estimations.[model.currentEstimation] + "/" + filename
-  let imgsource = model.currentTitle + "/" + postnamedir 
+  let imgsource = "sequences/" + sequences.[model.currentSequence] + "/" + postnamedir 
   let isVisible = model.currentFrame = framenumber
-  img [Src imgsource; HTMLAttr.Height "640px"; Hidden (not isVisible) ]
+  img [Src imgsource; HTMLAttr.Height imsizes.[model.imsize]; Hidden (not isVisible) ]
 
 let view (model:Model) dispatch =
   let images = Array.init 36 (getImgSource model) 
@@ -123,7 +139,7 @@ let view (model:Model) dispatch =
     else
        estimations.[model.currentEstimation]  + (model.currentFrame.ToString())
   div []
-      [ h1[][str model.currentTitle]
+      [ h1[][str sequences.[model.currentSequence]]
         h2[][str estimation]
         h2[][str ("Slowdown : " + model.slowdown.ToString())]
         div[]images]

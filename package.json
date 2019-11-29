@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "python dirupdater.py && webpack-dev-server"
+    
   },
   "dependencies": {
     "@babel/core": "^7.5.5",
