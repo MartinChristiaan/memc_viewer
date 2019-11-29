@@ -113,6 +113,8 @@ let update (msg:Msg) (model:Model) =
     | DecreaseSlowdown -> {model with slowdown = model.slowdown-1}
     | IncreaseSize -> {model with imsize = (increaseBoundedInt model.imsize (imsizes.Length-1))}
     | DecreaseSize -> {model with imsize = (decreaseBoundedInt model.imsize (imsizes.Length-1)) }
+    | NextSequence -> {model with currentSequence = (increaseBoundedInt model.currentSequence (sequences.Length-1)) }
+    | PreviousSequence -> {model with currentSequence = (decreaseBoundedInt model.currentSequence (sequences.Length-1)) }
 
 // VIEW (rendered with React)
 
